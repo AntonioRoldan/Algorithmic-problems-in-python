@@ -283,6 +283,7 @@ def nqueens(chess_board):
         if (len(str(column_number)) != len(str(column_number - 1)) and not digit_increased):
             digit_length_increase += 1
             digit_increased = True
+        digit_increased = False if digit_increased else True
         column_number =  column_number + 1 if down_most_row else column_number
         right_most_column = True if column_number == len(chess_board[0]) + 1 else False
         if(down_most_row):
