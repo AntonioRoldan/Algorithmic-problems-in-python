@@ -271,12 +271,18 @@ def nqueens(chess_board):
     right_most_column = False
     down_most_row = False
     first_square = False
+    digit_increased = False
     ascii_index = 0
+    iterations = 0
+    digit_length_increase = 0
     column_number = 1
     row_letter = "A"
     column = []
-    while (not right_most_column):
+    while (column_number != len(chess_board[0])):
         #A function called get column will move towards the right
+        if (len(str(column_number)) != len(str(column_number - 1)) and not digit_increased):
+            digit_length_increase += 1
+            digit_increased = True
         column_number =  column_number + 1 if down_most_row else column_number
         right_most_column = True if column_number == len(chess_board[0]) + 1 else False
         if(down_most_row):
@@ -310,7 +316,7 @@ def nqueens(chess_board):
             ascii_index = ascii_uppercase.index(row_letter)
             down_most_row = True if ascii_index + 1 == len(chess_board[0]) else False
             possible_permutations = tuple(endangered_squares_copy.keys())
-    possible_permutations = (permutation for permutation in possible_permutations if len(permutation) == len(chess_board[0]) * 2)
+    possible_permutations = [permutation for permutation in possible_permutations if len(permutation) == (column_number * 2) + digit_length_increase]
     return possible_permutations
 
 def main():
@@ -318,8 +324,8 @@ def main():
     chess_board = create_board(n) #We create an nxn dimensions board
     #position = ('H', 8)
     #print(get_endangered_squares(position, chess_board))
-    permutations = sorted(nqueens(chess_board))
-    print(len(permutations))
+    permutations = nqueens(chess_board)
+    print(permutations)
     #letter, number = 'A', 2
     #print(get_endangered_squares(position=(letter, number), chess_board=chess_board))
     #Beyond D level to reach the top edge
