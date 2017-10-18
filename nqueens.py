@@ -278,23 +278,29 @@ def nqueens(chess_board):
     column_number = 1
     row_letter = "A"
     column = []
-    while (column_number != len(chess_board[0])):
+    while (not right_most_column):
         #A function called get column will move towards the right
-        if (len(str(column_number)) != len(str(column_number - 1)) and not digit_increased):
+        if (len(str(column_number)) != len(str(column_number - 1)) and not digit_increased or iterations == 100 or iterations == 90): #If we increase the amount of digits for the first nine numbers up until the 90 decimals we have before one hundred and so on
+            iterations = 0
             digit_length_increase += 1
             digit_increased = True
-        digit_increased = False if digit_increased else True
         column_number =  column_number + 1 if down_most_row else column_number
         right_most_column = True if column_number == len(chess_board[0]) + 1 else False
         if(down_most_row):
             column_number -= 1
             row_letter = 'A'
             endangered_squares = endangered_squares_copy
-            endangered_squares = {permutation: square for permutation, square in endangered_squares.items() if len(permutation) == column_number*2}  # Now we get rid of our first set of permutations, corresponding to the previously processed column
-            column_number += 1
             down_most_row = False
+            if (digit_increased):
+                iterations += 1
+                endangered_squares = {permutation: square for permutation, square in endangered_squares.items() if
+                                      len(permutation) == column_number * 2 + digit_length_increase * iterations}
+            else:
+                endangered_squares = {permutation: square for permutation, square in endangered_squares.items() if
+                                      len(permutation) == column_number * 2}
+            column_number += 1
         if (not endangered_squares):
-             endangered_squares = {str(column_square[0]) + str(column_square[1]): get_endangered_squares(column_square, chess_board) for column_square in endangered_column(('A', 1),chess_board)}
+             endangered_squares = {str(column_square[0]) + str(column_square[1]): get_endangered_squares(column_square, chess_board) for column_square in endangered_column(('A', 1), chess_board)}
              #Permutation maps the column number in this case one to each column_square along with the available squares it leaves
         else:
             #Here permutation should be set to A1A2, A1,B2, AN$N, B1A2, B1B2, $N$N
@@ -317,7 +323,8 @@ def nqueens(chess_board):
             ascii_index = ascii_uppercase.index(row_letter)
             down_most_row = True if ascii_index + 1 == len(chess_board[0]) else False
             possible_permutations = tuple(endangered_squares_copy.keys())
-    possible_permutations = [permutation for permutation in possible_permutations if len(permutation) == (column_number * 2) + digit_length_increase]
+    column_number -= 1 #After the last iteration, column number needs to be readjusted
+    possible_permutations = [permutation for permutation in possible_permutations if len(permutation) == (column_number * 2) + digit_length_increase * iterations]
     return possible_permutations
 
 def main():
