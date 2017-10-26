@@ -53,7 +53,7 @@ end
 def towards_right(nxm, position_at)
   matches = Array.new([])
   n_dimensions = nxm[0].length - 1
-  y, x = position_at[0] , position_at[1]
+  x, y =  position_at[1, position_at[0]]
   colour = nxm[y][x]
   loop do
     x += 1
@@ -67,7 +67,7 @@ end
 
 def towards_left(nxm, position_at)
   matches = Array.new([])
-  y, x = position_at[0], position_at[1]
+  x, y = position_at[1], position_at[0]
   colour = nxm[y][x]
   loop do
     x -= 1
@@ -81,7 +81,7 @@ end
 
 def upwards(nxm, position_at)
   matches = Array.new([])
-  y, x = position_at[0], position_at[1]
+  x, y = position_at[1], position_at[0]
   colour = nxm[y][x]
   loop do
     y -= 1
@@ -95,7 +95,7 @@ end
 
 def downwards(nxm, position_at)
   matches = Array.new([])
-  y, x = position_at[0], position_at[1]
+  x, y = position_at[1], position_at[0]
   m_dimension = nxm.length - 1
   colour = nxm[y][x]
   loop do
@@ -110,7 +110,7 @@ end
 
 def top_right_diagonal(nxm, position_at)
   matches = Array.new([])
-  y, x = position_at[0], position_at[1]
+  x, y = position_at[1], position_at[0]
   n_dimension = nxm[0].length - 1
   colour = nxm[y][x]
   loop do
@@ -126,7 +126,7 @@ end
 
 def top_left_diagonal(nxm, position_at)
   matches = Array.new([])
-  y, x = position_at[0], position_at[1]
+  x, y = position_at[1], position_at[0]
   colour = nxm[y][x]
   loop do
     x -= 1
@@ -141,7 +141,7 @@ end
 
 def bottom_left_diagonal(nxm, position_at)
   matches = Array.new([])
-  y, x = position_at[0], position_at[1]
+  x, y = position_at[1], position_at[0]
   m_dimension = nxm.length - 1
   n_dimension = nxm[0].length - 1
   colour = nxm[y][x]
@@ -158,7 +158,7 @@ end
 
 def bottom_right_diagonal(nxm, position_at)
   matches = Array.new([])
-  y, x = position_at[0], position_at[1]
+  x, y = position_at[1], position_at[0]
   m_dimensions = nxm.length - 1
   colour = nxm[y][x]
   loop do
@@ -179,10 +179,11 @@ def compute_matches_from_corner(nxm, which_corner)
   by imagining a clock ticking but in this case we will only cover one of the quarters
   DOC
   top_right, top_left, bottom_left, bottom_right = which_corner[:at_corner][0], which_corner[:at_corner][1], which_corner[:at_corner][2], which_corner[:at_corner][3]
-  position_at = [0, nxm[0].length - 1] if top_right
-  position_at = [0, 0] if top_left
-  position_at = [nxm.length - 1, 0] if bottom_left
-  position_at = [nxm.length - 1, nxm[0].length - 1] if bottom_right
+  x, y = nxm[0].length - 1, 0 if top_right
+  x, y = 0, 0 if top_left
+  x, y = nxm[0].length - 1, nxm.length - 1 if bottom_right
+  x, y = 0, nxm.length - 1 if bottom_left
+  position_at = y, x
   return (upwards(nxm, position_at) << top_right_diagonal(nxm, position_at) << towards_right(nxm, position_at)).flatten! if bottom_left #First try first quarter
   return (towards_right(nxm, position_at) << bottom_right_diagonal(nxm, position_at) << downwards(nxm, position_at)).flatten! if top_left #Secondly try second quarter
   return (downwards(nxm, position_at) << bottom_left_diagonal(nxm, position_at) << towards_left(nxm, position_at)).flatten! if top_right #Thirdly try third quarter
