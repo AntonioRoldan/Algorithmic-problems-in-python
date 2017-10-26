@@ -1,4 +1,4 @@
-#Coloured cubes
+# Coloured cubes
 
 Consider having n cubes, each being characterized by their edge length and their colour. 
 Use the cubes to build a tower of maximum height, under the following conditions:
