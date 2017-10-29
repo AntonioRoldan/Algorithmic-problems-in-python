@@ -226,7 +226,7 @@ end
 def collect_square_matches(nxm, colours_in_matrix)
   <<-DOC
   Gets a dictionary of dictionaries mapping colours to a dictionary containing their corresponding 
-  coordinates along with their adjacents, by colour we mean a number between zero and nine
+  coordinates along with their adjacents, by colour we mean a number ranging between 0-9
   DOC
   colour_spots = {}
   colours_in_matrix.each {|colour| colour_spots[colour] = find_colour_spots(nxm, colour)}
@@ -234,9 +234,120 @@ def collect_square_matches(nxm, colours_in_matrix)
 end
 
 def find_largest_connected_set(nxm)
+  arranged_colour_spots = {}
+  colour_spots = Array.new([]) #A 2D array containing
   colours_in_matrix = what_numbers_in_matrix(nxm)
-  dearranged_colours = collect_square_matches(nxm, colours_in_matrix) #We get all colours mapped to the squares where they can be found in turn mapped to their same colour adjacent squares
+  dearranged_colours = collect_square_matches(nxm, colours_in_matrix)
+  colours_in_matrix.each do |colour|
+    colour_spots[colour] = find_connected_sets(dearranged_colours[colour])
+  end
+end
 
+def get_random_key(dearranged_squares, visited_squares)
+  if visited_squares.empty?
+    random_key = dearranged_squares.keys.sample(1)
+  else
+    random_key = (dearranged_squares.keys - visited_squares.flatten!.slice(2).to_a).sample(1)
+  end
+  random_key
+end
+
+def at_which_corner(cur, square)
+  <<-DOC
+  It tells whether not a square is attached to another (cur in this case) by its corners 
+  if so it gives the corner at which it is attached, the data is extracted in the form of a dictionary
+  DOC
+  at_which_corner = Array.new([])
+  c_x, c_y = cur[1], cur[0]
+  s_x, s_y = square[1], square[0]
+  at_top_left, at_top_right, at_bottom_right, at_bottom_left = false, false, false, false
+  at_top_right = true if(s_x - c_x == 1 and c_y - s_y == 1) #We find it by subtracting coordinates
+  at_top_left = true if (c_x - s_x == 1 and c_y - s_y == 1)
+  at_bottom_right = true if (s_x - c_x == 1 and s_y - c_y == 1)
+  at_bottom_left = true if(c_x - s_x == 1 and s_y - c_y == 1)
+  at_which_corner << at_top_right << at_top_left << at_bottom_right << at_bottom_left
+  at_which_corner if at_which_corner.any? else false
+end
+
+def squares_attached_to_corner(dearranged_colours, cur)
+  <<-DOC
+  It returns a dictionary with each square adjacent to a given colour by its corners along with the point at which they are (top_left, top_right...)
+  Returns false if there are none
+  DOC
+  squares_at_corners = {} #Dictionary containing the squares which are attached at the corner and the corner at which the are attached
+  adjacent_squares = dearranged_colours[cur]
+  adjacent_squares.each {|square| squares_at_corners[square] = at_which_corner(cur, square) if at_which_corner(cur, square)}
+  adjacent_squares = false if adjacent_squares.empty? #If the square has no squares at any of the corners return a false boolean
+  adjacent_squares
+end
+
+def only_connected_by_corner(cur, square, at_which_corner, dearranged_colours)
+    <<-DOC
+    Returns true if square cannot be accesed from cur by moving through rows or columns
+    else false
+    DOC
+    top_left, top_right, bottom_right, bottom_left = at_which_corner[0], at_which_corner[1], at_which_corner[2], at_which_corner[3]
+    if top_left
+
+    elsif top_right
+    elsif bottom_right
+    elsif bottom_left
+    end
+end
+
+def process_connected_diagonals(square, dearranged_colours)
+  <<-DOC
+  It handles the possible case where there are several squares 
+  only connected by their corners
+  DOC
+
+end
+
+def filter_corner_squares(colour_spots, dearranged_colours, cur)
+  squares_at_each_corner = squares_attached_to_corner(dearranged_colours, cur)
+  if squares_at_each_corner.any?
+    squares_at_each_corner.each_pair do |square, at_which_corner|
+      if dearranged_colours[square].empty? #If we have a single square attached to our connected set which in turn has no other connection
+        dearranged_colours.delete(square)
+        colour_spots << square #We treat it as an independent non-connected set consisting of a single square 
+      elsif (dearranged_colours[cur] & dearranged_colours[square]).empty? #If the square at the corner is connected to other squares that have no connection with the set cur is in
+        #We first check if it is only connected by corner if not we add it to the spot and continue processing the rest
+      end
+    end
+  else
+      squares_at_each_corner #We return a false boolean if it turns out that our current square is not connected by any other through its corners
+      end
+end
+
+def find_connected_sets(dearranged_squares) #P1: dictionary of key: square value: square of same colour P2: Return value, 2D array with connected colour sets
+  <<-DOC
+  Finds connected sets of a given colour
+  DOC
+  colour_spot = Array.new([]) #It stores a connected set
+  colour_spots = Array.new([]) #It stores all connnected sets of a given colour
+  adjacent_to_adjacent = Array.new([]) #Adjacent to adjacent is going to store the connections that squares that are connected to our current square have
+  until dearranged_squares.empty? do
+    cur = get_random_key(dearranged_squares, colour_spot) #First we pick up a random square which we know has not already been spotted
+    adjacent_squares = dearranged_squares[cur]
+    colour_spots.push(colour_spot) unless colour_spot.empty?
+    colour_spot.clear
+    loop do
+      adjacent_squares.each {|square| dearranged_squares[square].each {|adjacent| adjacent_to_adjacent << adjacent}}
+      if colour_spot.empty?
+        colour_spot << adjacent_squares & adjacent_to_adjacent
+        adjacent_squares = adjacent_to_adjacent - adjacent_squares
+      else #if colour spot is not empty we know that adjacent squares has already been filled
+        adjacent_squares = adjacent_to_adjacent - adjacent_squares
+        colour_spot << (adjacent_to_adjacent & adjacent_squares) & colour_spot
+        if ((adjacent_to_adjacent - adjacent_squares) - colour_spot).empty? #If the difference operation between the sets of squares not visited yet and the ones we already visited is empty
+          colour_spots << colour_spot #We already found our main colour spot
+          break #and so we can stop our subroutine
+        end
+      end
+      adjacent_to_adjacent.clear
+    end
+  end
+  colour_spots #And return our value
 end
 
 def find_squares_with_colour(nxm, colour)
@@ -252,21 +363,18 @@ def find_squares_with_colour(nxm, colour)
   colour_found_at
 end
 
-def find_colour_regions(nxm, colour)
-  <<-DOC
-  It will return a dictionary of dictionaries, with each key being a colour/number and values being each square where it can be found,
-  mapped to its adjacent squares
-  DOC
+def find_colour_spots(nxm, colour)
   squares_adjacents = {}
   coloured_squares = find_squares_with_colour(nxm, colour)
   coloured_squares.each {|square| squares_adjacents[square] = find_adjacent_matches(nxm, square)}
   squares_adjacents
 end
 
+
 nxm = [[2, 2, 7], [9, 5, 5], [5, 9, 9]]
 
 numbers_in_matrix = what_numbers_in_matrix(nxm)
 squares_with_colour_5 = find_squares_with_colour(nxm, 5)
 adjacent_matches_for_5 = find_adjacent_matches(nxm, [1, 1])
-find_largest_connected_set_overall(nxm)
+puts find_largest_connected_set(nxm)
 
