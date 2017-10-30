@@ -255,7 +255,7 @@ end
 def at_which_corner(cur, square)
   <<-DOC
   It tells whether not a square is attached to another (cur in this case) by its corners 
-  if so it gives the corner at which it is attached, the data is extracted in the form of a dictionary
+  if so it gives the corner at which it is attached, the data is stored in a hash
   DOC
   at_which_corner = Array.new([])
   c_x, c_y = cur[1], cur[0]
@@ -281,22 +281,76 @@ def squares_attached_to_corner(dearranged_colours, cur)
   adjacent_squares
 end
 
-def process_connected_diagonals(square, dearranged_colours)
+def succesive_diagonal_squares(square, dearranged_colours, at_which_corner )
   <<-DOC
   It handles the possible case where there are several squares 
-  only connected by their corners
+  only connected by their corners until it reaches a fully connected set or any of the board's edges
   DOC
-
+  
 end
 
-def is_in_connected_set(adjacent, at_which_corner)
+def filter_corner_squares_helper(dearranged_colours, cur, at_which_corner)
   <<-DOC
   It will tell us whether not the given square is in turn connected to a whole different connected set 
   if so it will check if it is connected only diagonally which would mean it is an individual set consisting of 
   a single square otherwise it will tell us whether it is part of a whole connected set (in which case we will ignore it
   for it to be processed later on)
-  It should also handle the case where the square is part of a succesion of diagonally connected squares 
+  It should also handle the case where the square is part of a succesion of diagonally connected squares
   DOC
+  top_right, top_left, bottom_right, bottom_left = at_which_corner[0], at_which_corner[1], at_which_corner[2], at_which_corner[3]
+  at_top, at_bottom, on_right, on_left = false, false, false, false
+  x, y = cur[1], cur[0]
+  dearranged_colours[cur].each do |adjacent|
+    x_a, y_a = adjacent[1], adjacent[0]
+    if top_right
+        if x_a == x and y - y_a == 1 #If there is a sqaure attached to it in the same column
+          at_top = true
+        end
+        if x_a - x == 1 and y == y_a #If there is a square attached to it in the same row
+          on_right = true
+        end
+        if at_top or on_right #If there is a square attached to it in the same row or column
+          next #We ignore it for it to be processed later on as another independent fully connected set
+        else #If not we know it is connected by its corners to either another fully connected set or another independent square
+          succesive_diagonal_squares(adjacent, dearranged_colours, at_which_corner)
+        end
+    elsif top_left
+      if x_a == x and y - y_a == 1
+        at_top = true
+      end
+      if x - x_a == 1 and y == y_a
+        on_left = true
+      end
+      if at_top or on_left #If there is a square attached to it in the same row or column
+        next #We ignore it for it to be processed later on as another independent fully connected set
+      else #If not we know it is connected by its corners to either another fully connected set or another independent square
+        succesive_diagonal_squares(adjacent, dearranged_colours, at_which_corner)
+      end
+    elsif bottom_right
+      if x_a - x == 1 and y == y_a #If there is a square attached to it in the same row
+        on_right = true
+      end
+      if y_a - x == 1 and x == x_a #If there is a square attached to it in the same column
+        at_bottom =  true
+      end
+      if on_right or at_bottom #If there is a square attached to it in the same row or column
+        next #We ignore it for it to be processed later on as another independent fully connected set
+      else #If not we know it is connected by its corners to either another fully connected set or another independent square
+        succesive_diagonal_squares(adjacent, dearranged_colours, at_which_corner)
+      end
+    elsif bottom_left
+      if x - x_a == 1 and y == y_a #If there is a square attached to it in the same row
+        on_left = true
+      end
+      if y_a - x == 1 and x == x_a #If there is a square attached to it in the same column
+        at_bottom =  true
+      end
+      if on_left or at_bottom #If there is a square attached to it in teh same row or column
+        next #We ignore it for it to be processed later on as another independent fully connected set
+      else #If not we know it is connected by its corners to either another fully connected set or another independent square
+        succesive_diagonal_squares(adjacent, dearranged_colours, at_which_corner)
+      end
+    end
 end
 
 def filter_corner_squares(colour_spots, adjacent_squares, dearranged_colours)
@@ -305,9 +359,9 @@ def filter_corner_squares(colour_spots, adjacent_squares, dearranged_colours)
     if squares_at_each_corner.any?
       squares_at_each_corner.each_pair do |adjacent, at_which_corner|
         if dearranged_colours[adjacent].length == 1 #If it is connected to the corner and the length of squares connected to it is one we can delete it
-            colour_spots.delete(adjacent) #We consider it a unique set consisting of a single square
+            colour_spots << adjacent #We consider it a unique set consisting of a single square
             dearranged_colours.delete(adjacent) #We delete the element from the dictionary
-            dearranged_colours[square].delete(adjacentn) #and from the squares contained there
+            dearranged_colours[square].delete(adjacent) #and from the squares contained there
         elsif (dearranged_colours[square] & dearranged_colours[adjacent]).empty? #If there is no intersection between these
             #We will have two possible cases
 
@@ -330,6 +384,7 @@ def find_connected_sets(dearranged_squares) #P1: dictionary of key: square value
   dearranged_squares.each_key do |square|
     if dearranged_squares[square].empty? #Those elements that are not connected to any other
       colour_spots << square #Will be considered individual connected sets consisting of a single square
+      dearranged_squares.delete(square) #We delete them from dearranged_squares
     end
   end
   until dearranged_squares.empty? do
@@ -351,7 +406,7 @@ def find_connected_sets(dearranged_squares) #P1: dictionary of key: square value
           break #and so we can stop our subroutine
         end
       end
-      adjacent_to_adjacent.clear
+      adjacent_to_adjacent.clear #We empty adjacent to adjacent but not colour_spot since we will need it to get our random key
     end
   end
   colour_spots #And return our value
