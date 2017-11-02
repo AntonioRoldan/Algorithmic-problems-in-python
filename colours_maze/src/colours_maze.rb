@@ -71,7 +71,7 @@ def assemble_rows_helper(rows_ranges)
   DOC
   adjacent_rows_groups = Array.new([])
   adjacent_rows = Array.new([])
-  adjacent = false #Adjacent defines whether two elements contained, it merely determines the pre format in which we are going to store our data 
+  adjacent = false #Adjacent defines whether two elements contained, it merely determines the pre format in which we are going to store our data
   rows_ranges = rows_ranges.flatten!
   rows_ranges.delete(rows_ranges.first) #First element is always going to be false and so we get rid of it
   rows_ranges.uniq!
@@ -115,7 +115,9 @@ def assemble_rows_helper(rows_ranges)
           #If not we check if the last element and the first element of the next pair
           #Note: We have to make sure we won't repeat the case that is handled when a pair of length one is reached
           #If adjacent we set to not adjacent if not adjacent we do nothing
+        end
       end
+    end
   end
   print(rows_ranges)
   print("\n")
