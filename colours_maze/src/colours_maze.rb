@@ -64,10 +64,10 @@ end
 def assemble_rows_helper(rows_ranges)
   <<-DOC
   Returns array containing arrays that store groups of adjacent rows 
-  We know that for s, r and c with s being the amount of connected sets, r the amount of adjacent or single rows and c the overall amount 
+  We have s, r and c with s being the amount of connected sets, r the amount of adjacent or single rows and c the overall amount 
   of coloured squares contained in r 
   The following condition is then satisfied 
-  s >= r and s <= c 
+  r <= s <= c a
   In other words, the number of sets is greater or equal than the number of groups of adjacent or single rows 
   and less or equal than the number of squares of a given colour!
   DOC
@@ -83,6 +83,8 @@ def assemble_rows_helper(rows_ranges)
   print("\n")
   return [rows_ranges] if all_adjacent.all? {|difference| difference == 1}
   rows_ranges = rows_ranges.each_slice(2).to_a
+  print(rows_ranges)
+  print("\n")
   if rows_ranges.length == 1
     if rows_ranges.first.length == 1 #If there is a single row with the given colour
       adjacent_rows_groups << rows_ranges.first
@@ -141,6 +143,7 @@ def assemble_rows_helper(rows_ranges)
             adjacent_rows_groups << [rows_pairs.first]
           elsif rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #At this point we have an intermediate connection between two rows
             adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) - 1].last, rows_pairs.first] #and so we store it
+            adjacent_rows_groups << [rows_pairs.last] if rows_ranges.index(rows_pairs) == rows_ranges.length - 1
           else
             adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) -1].last]
             adjacent_rows_groups << [rows_pairs.first]
@@ -148,10 +151,10 @@ def assemble_rows_helper(rows_ranges)
           end
         else #if rows_pairs.last - rows_pairs.first != 1 and adjacent
           if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1
-            adjacent_rows << rows_pairs.first
-            print(adjacent_rows)
-            print("\n")
-            adjacent_rows_groups << adjacent_rows
+            adjacent_rows_groups << [rows_pairs.first]
+            adjacent_rows_groups << [rows_pairs.last] if rows_ranges.index(rows_pairs) == rows_ranges.length - 1
+            #print(adjacent_rows)
+            #print("\n")
           else
             adjacent_rows_groups << adjacent_rows
           end
@@ -203,7 +206,7 @@ def find_colour_sets(nxm)
   connected_sets
 end
 
-nxm = [[1, 1, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 1, 1], [0, 0, 0, 0, 0, 0], [1, 1, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0], [1, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+nxm = [[1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0], [1, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
 
 numbers_in_matrix = what_numbers_in_matrix(nxm)
 find_colour_sets(nxm)
