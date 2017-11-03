@@ -134,7 +134,11 @@ def assemble_rows_helper(rows_ranges)
             adjacent_rows << rows_pairs.last
           else
             adjacent_rows_groups << adjacent_rows
-            adjacent_rows_groups << [rows_pairs.first, rows_pairs.last] unless rows_ranges[rows_ranges.index(rows_pairs) + 1].first - rows_pairs.last == 1
+            if rows_ranges.index(rows_pairs) != rows_ranges.length - 1
+              adjacent_rows_groups << [rows_pairs.first, rows_pairs.last] unless rows_ranges[rows_ranges.index(rows_pairs) + 1].first - rows_pairs.last == 1
+            else
+              adjacent_rows_groups << [rows_pairs.first, rows_pairs.last]
+            end
             adjacent_rows = Array.new([])
           end
           adjacent_rows << rows_pairs.last
@@ -157,7 +161,6 @@ def assemble_rows_helper(rows_ranges)
             #print(adjacent_rows)
             #print("\n")
           else
-            print("b")
             adjacent_rows_groups << adjacent_rows
           end
           adjacent = false
@@ -210,7 +213,7 @@ def find_colour_sets(nxm)
   connected_sets
 end
 
-nxm = [[1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0], [1, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0]]
+nxm = [[1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0]]
 
 numbers_in_matrix = what_numbers_in_matrix(nxm)
 find_colour_sets(nxm)
