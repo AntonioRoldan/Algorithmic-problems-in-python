@@ -64,10 +64,12 @@ end
 def assemble_rows_helper(rows_ranges)
   <<-DOC
   Returns array containing arrays that store groups of adjacent rows 
-  Upon this assumption we know that for s, r and c with s being the amount of connected sets and r the amount of connected or independent rows and c 
-  the overall amount of coloured squares we can conclude that 
+  We know that for s, r and c with s being the amount of connected sets, r the amount of adjacent or single rows and c the overall amount 
+  of coloured squares contained in r 
+  The following condition is then satisfied 
   s >= r and s <= c 
-  In other words, the number of sets is greater or equal to the number of groups of adjacent or single rows and less or equal to the number of squares of a given colour!
+  In other words, the number of sets is greater or equal than the number of groups of adjacent or single rows 
+  and less or equal than the number of squares of a given colour!
   DOC
   adjacent_rows_groups = Array.new([])
   adjacent_rows = Array.new([])
@@ -76,50 +78,91 @@ def assemble_rows_helper(rows_ranges)
   rows_ranges.delete(rows_ranges.first) #First element is always going to be false and so we get rid of it
   rows_ranges.uniq!
   rows_ranges = rows_ranges.each_slice(2).to_a
+  all_adjacent = rows_ranges.flatten!.each_cons(2).map{|a, b| b - a}
+  print([rows_ranges]) if all_adjacent.all? {|difference| difference == 1}
+  print("\n")
+  return [rows_ranges] if all_adjacent.all? {|difference| difference == 1}
+  rows_ranges = rows_ranges.each_slice(2).to_a
   if rows_ranges.length == 1
     if rows_ranges.first.length == 1 #If there is a single row with the given colour
       adjacent_rows_groups << rows_ranges.first
     else #If there are two rows then
       if rows_ranges.first[0] - rows_ranges.first[1] == 1 #If the two only rows that we have are adjacent
         adjacent_rows_groups << rows_ranges.first #We store the two connected rows
-      else #We already have all connected sets stored!
-
+      else #If there two only rows we have are not adjacent
+        #We already have all connected sets stored!
       end
     end
   else #If there is more than one element
     rows_ranges.each do |rows_pairs|
       if rows_pairs.length == 1 and not adjacent #If we have a last row (number of rows is odd) and the previous pair of rows is not adjacent
-        if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1][1] == 1 #If second latter and last element are adjacent
-          adjacent_rows_groups << [rows_pairs.first, rows_ranges[rows_ranges.index(rows_pairs) - 1][1]]
+        if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #If second latter and last element are adjacent
+          adjacent_rows_groups << [rows_pairs.first, rows_ranges[rows_ranges.index(rows_pairs) - 1].last]
         else
+          adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) - 1].last]
           adjacent_rows_groups << rows_pairs #We store it as an independent set there for in an array
         end
-      elsif rows_pairs.length == 1 and adjacent #If we have a last row (number of rows is odd) and the previous pair of rows is adjacent
-        if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1][1] == 1 #If second latter and last element are adjacent
-          adjacent_rows << rows_ranges[rows_ranges.index(rows_pairs) - 1][1]
+      elsif rows_pairs.length == 1 and adjacent #If we have a last row (number of rows is odd) and the previous pair of rows is adjacent we may
+        if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #If our last element is part of our previous group
           adjacent_rows << rows_pairs.first
           adjacent_rows_groups << adjacent_rows
-        else
-          adjacent_rows_groups << rows_pairs #
+        else #If not we just add the current pair
+          adjacent_rows_groups << rows_pairs
         end
-      elsif rows_pairs.length == 2
+      else #We have elements of length 2 only before we get to the end of the list (assuming our list has an odd number of elements)
         if rows_pairs.last - rows_pairs.first == 1 and not adjacent #If a pair of rows is adjacent and the previous one isn't
-          adjacent = true #We must check if this is the first element in the array or not, if so we don't need to check adjacency between last row of previous pair and first row of current pair
-          adjacent_rows << rows_pairs.last
-          adjacent_rows << rows_pairs.first
+          if rows_ranges.index(rows_pairs) == 0 #We must check if this is the first element in the array or not, if so we don't need to check adjacency between last row of previous pair and first row of current pair
+            adjacent_rows << rows_pairs.first
+            adjacent_rows << rows_pairs.last
+          elsif rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #If the connection goes on we just add these next two elements
+            adjacent_rows << rows_ranges[rows_ranges.index(rows_pairs) - 1].last
+            adjacent_rows << rows_pairs.first
+            adjacent_rows << rows_pairs.last
+            adjacent_rows_groups << adjacent_rows
+          elsif rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1][1] != 1
+            adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) - 1][1]] #We only store adjacent rows at the point where we know for sure the connection has been put an end
+            adjacent_rows.clear
+            adjacent_rows << rows_pairs.first
+            adjacent_rows << rows_pairs.last
+          end
+          adjacent = true
         elsif rows_pairs.last - rows_pairs.first == 1 and adjacent #adjacent can only be set to true after at least one pair has been checked therefore we don't need to check for the pair's position
+          if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #If the connection goes on we just add these next two elements
+            adjacent_rows << rows_pairs.first
+            adjacent_rows << rows_pairs.last
+          else
+            adjacent_rows_groups << adjacent_rows
+            adjacent_rows.clear
+          end
           adjacent_rows << rows_pairs.last
           adjacent_rows << rows_pairs.first
-        elsif rows_pairs.last - rows_pairs.first != 1  #If a pair of rows are not adjacent and we have no previous adjacent pair
-          #We first check if the first element and the last element from the previous pair are adjacent
-          #If not we check if the last element and the first element of the next pair
-          #Note: We have to make sure we won't repeat the case that is handled when a pair of length one is reached
-          #If adjacent we set to not adjacent if not adjacent we do nothing
+        elsif rows_pairs.last - rows_pairs.first != 1 and not adjacent #If a pair of rows are not adjacent and we have no previous adjacent pair
+          if rows_ranges.index(rows_pairs) == 0 #We must check if this is the first element in the array or not, if so we don't need to check adjacency between last row of previous pair and first row of current pair
+            adjacent_rows_groups << [rows_pairs.first]
+          elsif rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #At this point we have an intermediate connection between two rows
+            adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) - 1].last, rows_pairs.first] #and so we store it
+          else
+            adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) -1].last]
+            adjacent_rows_groups << [rows_pairs.first]
+            adjacent_rows_groups << [rows_pairs.last] if rows_ranges.index(rows_pairs) == rows_ranges.length - 1
+          end
+        else #if rows_pairs.last - rows_pairs.first != 1 and adjacent
+          if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1
+            adjacent_rows << rows_pairs.first
+            print(adjacent_rows)
+            print("\n")
+            adjacent_rows_groups << adjacent_rows
+          else
+            adjacent_rows_groups << adjacent_rows
+          end
+          adjacent = false
+          adjacent_rows = Array.new([])
         end
       end
     end
   end
-  print(rows_ranges)
+  adjacent_rows_groups.uniq!
+  print(adjacent_rows_groups)
   print("\n")
 end
 
@@ -129,7 +172,7 @@ def assemble_rows(spot)
   DOC
   adjacent_rows_group = Array.new([])
   begin_range = spot.keys.min
-  end_range = spot.length
+  end_range = spot.length + 1
   rows_ranges = Array.new([])
   (begin_range..end_range + 1).each do |row_number|
     cur_row = row_number if spot.keys.include? row_number
@@ -137,12 +180,14 @@ def assemble_rows(spot)
     prev_row = row_number - 1 if spot.keys.include? row_number - 1
     prev_row = false unless spot.keys.include? row_number - 1
     rows_ranges << [prev_row, cur_row]
+    #print([prev_row, cur_row])
+    #print("\n")
   end
   adjacent_rows_group = assemble_rows_helper(rows_ranges)
 end
 
 def find_colour_sets_helper(spots)
-  adjacent_rows_group = assemble_rows(spot) #We have the group of rows that have to be checked in the dictionary
+  adjacent_rows_group = assemble_rows(spots) #We have the group of rows that have to be checked in the dictionary
 end
 
 def find_colour_sets(nxm)
@@ -158,7 +203,7 @@ def find_colour_sets(nxm)
   connected_sets
 end
 
-nxm = [[1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 1, 1], [0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [0, 0, 1, 0, 1, 0], [0, 0, 1, 0, 0, 0]]
+nxm = [[1, 1, 1, 1, 1, 0], [0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 1, 1], [0, 0, 0, 0, 0, 0], [1, 1, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0], [1, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
 
 numbers_in_matrix = what_numbers_in_matrix(nxm)
 find_colour_sets(nxm)
