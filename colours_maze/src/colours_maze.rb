@@ -63,7 +63,7 @@ end
 
 def assemble_rows_helper(rows_ranges)
   <<-DOC
-  Returns array containing arrays that store groups of adjacent rows 
+  Returns array containing arrays that store groups of adjacent rows or single independent rows 
   We have s, r and c with s being the amount of connected sets, r the amount of adjacent or single rows and c the overall amount 
   of coloured squares contained in r and s 
   Having these variables the following condition is then satisfied 
@@ -196,8 +196,20 @@ def assemble_rows(spot)
   adjacent_rows_group = assemble_rows_helper(rows_ranges)
 end
 
+def find_connected_sets(spots, adjacent_rows)
+  <<-DOC
+  It will return an array containing all connected sets by row and column of a given colour
+  that can be created a cluster of adjacent rows
+  DOC
+  
+end
+
 def find_colour_sets_helper(spots)
-  adjacent_rows_group = assemble_rows(spots) #We have the group of rows that have to be checked in the dictionary
+  connected_sets = Array.new([])
+  adjacent_rows_groups = assemble_rows(spots) #We have the group of rows that have to be checked in the dictionary
+  adjacent_rows_groups.each do |adjacent_rows|
+
+  end
 end
 
 def find_colour_sets(nxm)
@@ -213,7 +225,7 @@ def find_colour_sets(nxm)
   connected_sets
 end
 
-nxm = [[1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 1, 0], [0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 1], [0, 0, 0, 0, 0, 0]]
+nxm = [[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1]]
 
 numbers_in_matrix = what_numbers_in_matrix(nxm)
 find_colour_sets(nxm)
