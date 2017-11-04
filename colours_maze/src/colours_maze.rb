@@ -32,13 +32,13 @@ def assemble_rows_sets(nxm, colour)
         colour_found = true
       end
     end
-    connected_sets = find_connected_sets(nxm, colour, row)
+    connected_sets = find_squares_in_row(nxm, colour, row)
     previous_rows[y] = connected_sets if colour_found #We ignore those rows that do not contain our colour
   end
   previous_rows
 end
 
-def find_connected_sets(nxm, colour, row)
+def find_squares_in_row(nxm, colour, row)
   <<-DOC
   Returns groups of adjacents squares or single adjacent squares sharing a given colour, contained in a given row 
   these will be given as ranges (stardardising the length of elements in the dicitonary to having either length one or two will make it easier
@@ -74,17 +74,13 @@ def assemble_rows_helper(rows_ranges)
   adjacent_rows_groups = Array.new([])
   adjacent_rows = Array.new([])
   adjacent = false #Adjacent defines whether two elements contained, it merely determines the pre format in which we are going to store our data
-  rows_ranges = rows_ranges.flatten!
-  rows_ranges.delete(rows_ranges.first) #First element is always going to be false and so we get rid of it
   rows_ranges.uniq!
-  rows_ranges = rows_ranges.each_slice(2).to_a
-  all_adjacent = rows_ranges.flatten!.each_cons(2).map{|a, b| b - a}
-  print([rows_ranges]) if all_adjacent.all? {|difference| difference == 1}
-  print("\n")
-  return [rows_ranges] if all_adjacent.all? {|difference| difference == 1}
   rows_ranges = rows_ranges.each_slice(2).to_a
   print(rows_ranges)
   print("\n")
+  all_adjacent = rows_ranges.flatten!.each_cons(2).map{|a, b| b - a}
+  return [rows_ranges] if all_adjacent.all? {|difference| difference == 1}
+  rows_ranges = rows_ranges.each_slice(2).to_a
   if rows_ranges.length == 1
     if rows_ranges.first.length == 1 #If there is a single row with the given colour
       adjacent_rows_groups << rows_ranges.first
@@ -101,14 +97,15 @@ def assemble_rows_helper(rows_ranges)
         if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #If second latter and last element are adjacent
           adjacent_rows_groups << [rows_pairs.first, rows_ranges[rows_ranges.index(rows_pairs) - 1].last]
         else
-          adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) - 1].last]
-          adjacent_rows_groups << rows_pairs #We store it as an independent set there for in an array
+          adjacent_rows_groups << [rows_ranges[rows_ranges.index(rows_pairs) - 1].last] #We add the previous element as an independent row
+          adjacent_rows_groups << rows_pairs #and our current last row also stored as an independent row 
         end
       elsif rows_pairs.length == 1 and adjacent #If we have a last row (number of rows is odd) and the previous pair of rows is adjacent we may
         if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1 #If our last element is part of our previous group
           adjacent_rows << rows_pairs.first
           adjacent_rows_groups << adjacent_rows
         else #If not we just add the current pair
+          adjacent_rows_groups << adjacent_rows
           adjacent_rows_groups << rows_pairs
         end
       else #We have elements of length 2 only before we get to the end of the list (assuming our list has an odd number of elements)
@@ -172,8 +169,7 @@ def assemble_rows_helper(rows_ranges)
   adjacent_rows_groups.each {|adjacent_rows| adjacent_rows.sort!}
   adjacent_rows_groups.uniq!
   adjacent_rows_groups.each {|adjacent_rows| adjacent_rows.uniq!}
-  print(adjacent_rows_groups)
-  print("\n")
+  adjacent_rows_groups
 end
 
 def assemble_rows(spot)
@@ -182,18 +178,43 @@ def assemble_rows(spot)
   DOC
   adjacent_rows_group = Array.new([])
   begin_range = spot.keys.min
-  end_range = spot.length + 1
+  end_range = spot.keys.max
   rows_ranges = Array.new([])
-  (begin_range..end_range + 1).each do |row_number|
+  (begin_range..end_range).each do |row_number|
     cur_row = row_number if spot.keys.include? row_number
     cur_row = false unless spot.keys.include? row_number
     prev_row = row_number - 1 if spot.keys.include? row_number - 1
     prev_row = false unless spot.keys.include? row_number - 1
-    rows_ranges << [prev_row, cur_row]
-    #print([prev_row, cur_row])
-    #print("\n")
+    rows_ranges << prev_row << cur_row
   end
+  rows_ranges = rows_ranges.select {|row| row.class == Fixnum}
   adjacent_rows_group = assemble_rows_helper(rows_ranges)
+  adjacent_rows_group
+end
+
+def do_they_match(pivot_squares, row_squares)
+  <<-DOC
+  It returns a boolean to indicate if a set of squares found in pivot and another found in our current row are connected
+  DOC
+  #We need to chec
+end
+
+def compare_pivot_row(prev_row, cur_row, connected_sets, i, adjacent_rows)
+  <<-DOC
+  The fact that there are n adjacent squares in our current row with n being the amount of connected squares in the previous row 
+  is a prerequisite for there to be a connected set that spreads throughout these two rows however that in itself does not guarantee 
+  that there is in effect a connected set, the relation between the ranges will give us this fact, it is also possible that there are
+  more than n connected squares in our row, so we can determine that c_n a variable representing the amount of connected squares in our current row 
+  must meet the following condition
+  c_n >= p_n with p_n representing the same value for the previous row if these numbers are not equal we know that at least one of the connected sets that we 
+  started to create is over at this point and so we have the condition that if c_n < p_n the amount of connected sets that end at this point which we will 
+  call e_s (ended sets) is equal to the difference between c_n and p_n if and only if c_n <= p_n 
+  At the same time if c_n >= p_n we know that new connected sets are started at this point with the number of new sets n_s being equal to c_n - p_n if and only if 
+  c_n < p_n now if both are equal c_n = p_n that doesn't necessarily mean that the connected sets continue. 
+  Therefore the conditions stated before are only a proof that at the very least c_n - p_n new sets are starting or ending, there might be more with
+  DOC
+  print(prev_row, "", cur_row) unless i == adjacent_rows.length - 1
+  print("\n")
 end
 
 def find_connected_sets(spots, adjacent_rows)
@@ -201,14 +222,22 @@ def find_connected_sets(spots, adjacent_rows)
   It will return an array containing all connected sets by row and column of a given colour
   that can be created a cluster of adjacent rows
   DOC
-  
+  connected_sets = Array.new([])
+  #print(adjacent_rows)
+  #print("\n")
+  adjacent_rows.each_index do |i|
+    prev_row = adjacent_rows[i]
+    cur_row = adjacent_rows[i + 1] unless i == adjacent_rows.length - 1
+    compare_pivot_row(prev_row, cur_row, connected_sets, i, adjacent_rows) unless i == adjacent_rows.length - 1 and adjacent_rows.length == 1
+  end
 end
 
 def find_colour_sets_helper(spots)
   connected_sets = Array.new([])
+  temporary_set_container = Array.new([])
   adjacent_rows_groups = assemble_rows(spots) #We have the group of rows that have to be checked in the dictionary
   adjacent_rows_groups.each do |adjacent_rows|
-
+    find_connected_sets(spots, adjacent_rows)
   end
 end
 
@@ -225,7 +254,7 @@ def find_colour_sets(nxm)
   connected_sets
 end
 
-nxm = [[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1]]
+nxm = [[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 1], [0, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0]]
 
 numbers_in_matrix = what_numbers_in_matrix(nxm)
 find_colour_sets(nxm)
