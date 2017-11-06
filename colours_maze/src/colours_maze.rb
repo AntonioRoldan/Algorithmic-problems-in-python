@@ -151,6 +151,7 @@ def assemble_rows_helper(rows_ranges)
           end
         else #if rows_pairs.last - rows_pairs.first != 1 and adjacent
           if rows_pairs.first - rows_ranges[rows_ranges.index(rows_pairs) - 1].last == 1
+            adjacent_rows_groups << adjacent_rows
             adjacent_rows_groups << [rows_pairs.first]
             adjacent_rows_groups << [rows_pairs.last] if rows_ranges.index(rows_pairs) == rows_ranges.length - 1
             #print(adjacent_rows)
@@ -167,6 +168,8 @@ def assemble_rows_helper(rows_ranges)
   adjacent_rows_groups.each {|adjacent_rows| adjacent_rows.sort!}
   adjacent_rows_groups.uniq!
   adjacent_rows_groups.each {|adjacent_rows| adjacent_rows.uniq!}
+  #print(adjacent_rows_groups)
+  #print("\n")
   adjacent_rows_groups
 end
 
@@ -194,7 +197,27 @@ def single_square_to_single_square(cur_single_square_at, prev_single_square_at)
   It checks whether not there is a match between two single squares
   if so they will create a column
   DOC
-  cur_single_square_at.last == prev_single_square_at.last
+  cur_single_square_at.first.last == prev_single_square_at.first.last
+end
+
+def square_against_range(square, beg_range, end_range)
+  square_at = square.first.last
+  if square_at >= beg_range and square_at <= end_range
+    true
+  else
+    false
+  end
+end
+
+def do_blocks_match(begin_range, end_range, prev_beg, prev_end)
+  <<-DOC
+  It returns a boolean to indicate if a set of squares found in pivot and another found in our current row are connected
+  DOC
+  if (begin_range >= prev_beg and begin_range <= end_range) or (end_range <= prev_end and end_range >= prev_beg)
+    true
+  else
+    false
+  end
 end
 
 def build_connected_sets(cur_block, prev_block, connected_sets)
@@ -215,13 +238,25 @@ def is_in_range_single_square(prev_row, cur_square, connected_sets)
   DOC
   prev_row.each do |prev_square|
     if prev_square.length == 1 #If the previous square is of length one
+      print("prev")
+      print(prev_square)
+      print("\n")
+      print("cur")
+      print(cur_square)
+      print("\n")
       if single_square_to_single_square(cur_square, prev_square)#We check whether not there is a match between two single blocks through the rows
+        print("Connection between two single squares: ")
+        print(cur_square, " ", prev_square)
         build_connected_sets(cur_square, prev_square, connected_sets)
       else
         connected_sets << prev_square
       end
     else #If the previous square is greater than one
       #We check if our current single block is lying at any point contained within our range
+      print("Connection between square and block: ")
+      print("\n")
+      print(prev_square, cur_square)
+      print("\n")
       prev_beg = prev_square.first.last
       prev_end = prev_square.last.last
       prev_block = prev_square
@@ -267,26 +302,6 @@ def do_ranges_overlap(cur_block, begin_range, end_range, prev_row, connected_set
   end
 end
 
-def square_against_range(square, beg_range, end_range)
-  square_at = square.first.last
-  if square_at >= beg_range and square_at <= end_range
-    true
-  else
-    false
-  end
-end
-
-def do_blocks_match(begin_range, end_range, prev_beg, prev_end)
-  <<-DOC
-  It returns a boolean to indicate if a set of squares found in pivot and another found in our current row are connected
-  DOC
-  if (begin_range >= prev_beg and begin_range <= end_range) or (end_range <= prev_end and end_range >= prev_beg)
-    true
-  else
-    false
-  end
-end
-
 def compare_pivot_row(prev_row, cur_row, connected_sets)
   <<-DOC
   The fact that there are n adjacent squares in our current row with n being the amount of connected squares in the previous row 
@@ -309,11 +324,14 @@ def compare_pivot_row(prev_row, cur_row, connected_sets)
     print("Cur_square: ")
     print(cur_square)
     print("\n")
-    if cur_square.length == 1
+    if cur_square.length == 1 #We are comparing a single square against either another range or another square
       #print(cur_square)
       #print("\n")
       #print(prev_row)
       #print("\n")
+      print("There is a single square here, bitch ")
+      print(cur_square)
+      print("\n")
       is_in_range_single_square(prev_row, cur_square, connected_sets)
     else
       begin_range = cur_square.first.last
@@ -336,10 +354,11 @@ def find_connected_sets(spots, adjacent_rows)
   that can be created a cluster of adjacent rows
   DOC
   connected_sets = Array.new([])
-  #print(adjacent_rows)
-  #print("\n")
   if adjacent_rows.length == 1 #If the length is one that means we have a group but not necessarily a single independent row !
     spots[adjacent_rows.first].each {|adjacent_squares| connected_sets << adjacent_squares}
+    print("Connected sets: ")
+    print(connected_sets)
+    print("\n")
     cur_row = adjacent_rows.first
   else
     adjacent_rows.each_index do |i|
@@ -351,18 +370,19 @@ def find_connected_sets(spots, adjacent_rows)
         prev_row.sort!
         cur_row.sort!
       end
-      compare_pivot_row(prev_row, cur_row, connected_sets) unless i == adjacent_rows.length - 1 and adjacent_rows.length == 1
-      #print(prev_row, "", cur_row)
-      #print("\n")
+      compare_pivot_row(prev_row, cur_row, connected_sets)
     end
   end
+  connected_sets
 end
 
 def find_colour_sets_helper(spots)
   connected_sets = Array.new([])
+  temporary_set_container = Array.new([])
   adjacent_rows_groups = assemble_rows(spots) #We have the group of rows that have to be checked in the dictionary
   adjacent_rows_groups.each do |adjacent_rows|
-    find_connected_sets(spots, adjacent_rows)
+    temporary_set_container = find_connected_sets(spots, adjacent_rows)
+    temporary_set_container.each {|set| connected_sets << set}
   end
   connected_sets
 end
@@ -377,9 +397,10 @@ def find_colour_sets(nxm)
   colours_in_matrix = colours_in_matrix.sort!
   colours_in_matrix.each {|colour| connected_spots[colour] = assemble_rows_sets(nxm, colour)} #First we arranged the disassembled spots of a given colour in a dictionary
   colours_in_matrix.each {|colour| connected_sets[colour] = find_colour_sets_helper(connected_spots[colour])}
+  print(connected_sets)
   connected_sets
 end
 
-nxm = [[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 1], [0, 1, 0, 0, 0, 0], [1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0]]
+nxm = [[1, 1, 1, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 1, 0, 1], [0, 1, 0, 1, 0, 0], [0, 1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 0, 0, 0, 0, 0]]
 
 find_colour_sets(nxm)
