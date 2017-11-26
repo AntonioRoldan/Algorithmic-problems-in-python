@@ -105,12 +105,12 @@ class DoubleLinkedList:
         return True
 
 def arrange_into_doubly_linked_list():
-    len_to_word = {}
+    len_to_word = {} 
     text_file = open('alicewonderland.txt', 'r')
-    lines = text_file.readlines()
-    for line in lines:
-        for word in line.split():
-            if len(word) not in len_to_word.keys():
+    lines = text_file.readlines() 
+    for line in lines: 
+        for word in line.split(): 
+            if len(word) not in len_to_word.keys(): 
                 words_of_same_length = []
                 for line in lines:
                     for particle in line.split():
