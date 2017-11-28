@@ -30,8 +30,8 @@ class subtree():
     def __init__(self):
         self.root = None
 
-    def add_ID(self, ID, initialise):
-        if initialise:
+    def add_ID(self, ID, new_subtree):
+        if new_subtree:
             self.root = Node(ID) #We add the root
             return True
         else:
@@ -47,7 +47,6 @@ class binary_search_tree():
 
     def __init__(self):
         self.main_subtree = None
-        self.tree = None
         self.current_subtree = None
         self.initialise = True
         self.new_subtree = True
@@ -57,6 +56,8 @@ class binary_search_tree():
         if self.initialise: #If we start the tree
             if self.new_subtree: #If we start a new subtree
                 self.main_subtree = subtree()
+                self.main_subtree.add_ID(ID, self.new_subtree)
+                print(ID)
                 self.new_subtree = False
             elif self.main_subtree.add_ID(ID, self.new_subtree): #If the tree already has a parent and a children
                 self.current_subtree = self.main_subtree #The main
@@ -73,3 +74,10 @@ class binary_search_tree():
             else:
                 self.tree.append(self.current_subtree)
                 self.new_subtree = True
+
+if __name__ == '__main__':
+    def test():
+        registration = binary_search_tree()
+        registration.add_ID(1111)
+
+    test()
