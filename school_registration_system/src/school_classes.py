@@ -43,6 +43,7 @@ class subtree():
         self.root = None
 
     def add_ID(self, ID, new_subtree):
+
         has_right = False
         has_left = False
         if new_subtree:
@@ -52,12 +53,13 @@ class subtree():
             if ID < self.root.get_data():
                 self.root.set_left(ID)
                 has_left = True
-                return True
+                return has_left
             if ID > self.root.get_data():
                 self.root.set_right(ID)
                 has_right = True
+                return has_right
             if has_right and has_left:
-                return False
+                return False #We are done with the
 
     def get_parent(self): #It will only work when a value has already been added else will return None
         return self.root.get_parent() #The program constraints won't let that happen
@@ -170,9 +172,11 @@ class student_registration():
                 self.main_subtree.add_ID(ID, self.new_subtree)
                 self.db_students[ID] = data
                 self.new_subtree = False
+                print(ID)
             elif self.main_subtree.add_ID(ID, self.new_subtree): #If the tree already has a parent and a children
                 self.current_subtree = self.main_subtree #The main
                 self.db_students[ID] = student(data)
+                print(ID)
             else:
                 self.db_students[ID] = self.new_student(self, data)
                 self.db_students[ID] = student(data)
@@ -180,19 +184,23 @@ class student_registration():
                 self.initialise = False
                 self.new_subtree = True #We set new subtree to true in case it can be
                 self.tree = self.current_subtree
+                print(ID)
         else: #The resulting option is to create a new subtree once the main subtree has been added
             if self.new_subtree == True:
                 self.current_subtree = subtree()
                 self.current_subtree.add_ID(ID, self.new_subtree)
                 self.new_subtree = False
                 self.db_students[ID] = student(data)
+                print(ID)
             elif self.current_subtree.add_ID(ID, self.new_subtree):
                 self.db_students[ID] = student(data)
                 self.new_subtree = False
+                print(ID)
             else: #If the subtree has already been filled
                 self.db_students[ID] = student(data)
                 self.IDs.append(self.current_subtree)
                 self.new_subtree = True
+                print(ID)
 
     def update_info(self, student):
         to_be_updated = 0
@@ -279,4 +287,9 @@ class student_registration():
                 return
         self.display_data(undergrad_students)
 
+
+
+
 if __name__ == '__main__':
+    student_registration = student_registration()
+    student_registration.new_student(1111, ("Antonio", "210CT", "02/10/1995", strftime("%d/%m/%Y"), "undergrad"))
