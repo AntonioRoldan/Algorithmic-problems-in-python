@@ -19,3 +19,4 @@ def compute_load_composition(amount, materials):
 materials = {"Copper" : (7, 65), "Gold" : (4, 100) , "Plastic" : (15, 50)}
 
 print(compute_load_composition(10, materials))
+
