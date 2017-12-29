@@ -57,17 +57,27 @@ BinTreeNode* get_parent(BinTreeNode* tree){
     return tree->parent;
 }
 
+BinTreeNode* find_minimum(BinTreeNode* root){
+    while(root->left != NULL){
+        root = root->left;
+    }
+    return root;
+    //Once we have traversed it until one or both of the children are null
+}
+
 void deletion(BinTreeNode* tree, int key){
     BinTreeNode* node = find_node(tree, key);
     BinTreeNode* parent = node->parent;
-    BinTreeNode* temp;
+    BinTreeNode* minimum;
     int children_count = count_children(node);
-    int p_value = parent->value;
+    if(tree->right == NULL and tree->left == NULL){
+        tree = NULL;
+    }
     if(children_count == 0){
         if (parent->right == node){
             parent->right = NULL;
         } else{
-            parent->left == NULL;
+            parent->left = NULL;
         }
         parent->left = NULL;
     } else if(children_count == 1){
@@ -81,7 +91,10 @@ void deletion(BinTreeNode* tree, int key){
             node->left = NULL;
         }
     } else{
-        
+        minimum = find_minimum(node); //We find minimum value in right subtree
+        node->value = minimum->value;
+        deletion(minimum, minimum->value);
+        delete minimum;
     }
 }
 
@@ -102,8 +115,7 @@ void in_order(BinTreeNode* tree) {
         in_order(tree->right);
 }
 
-int main(int argc, char *argv[])
-{
+BinTreeNode* set_tree(){
     BinTreeNode* t = tree_insert(0, 6);
     tree_insert(t, 10);
     tree_insert(t, 5);
@@ -112,9 +124,33 @@ int main(int argc, char *argv[])
     tree_insert(t, 4);
     tree_insert(t, 11);
     tree_insert(t, 1);
-    in_order(t);
-    std::cout<<find_node(t, 2)<<std::endl;
-    deletion(t, 1);
-    in_order(t);
+    tree_insert(t, 9);
+    return t;
+}
+
+int main(int argc, char *argv[])
+{
+    BinTreeNode* t = set_tree();
+    std::cout<<"Case 1, zero children: "<<std::endl;
+    BinTreeNode* case1 = set_tree();
+    std::cout<<"Tree before deletion: "<<std::endl;
+    in_order(case1);
+    deletion(case1, 1);
+    std::cout<<"Tree after deletion: "<<std::endl;
+    in_order(case1);
+    std::cout<<"Case 2, one child: "<<std::endl;
+    BinTreeNode* case2 = set_tree();
+    std::cout<<"Tree before deletion: "<<std::endl;
+    in_order(case2);
+    deletion(case2, 3);
+    std::cout<<"Tree after deletion: "<<std::endl;
+    in_order(case2);
+    std::cout<<"Case 3, two children: "<<std::endl;
+    BinTreeNode* case3 = set_tree();
+    std::cout<<"Tree before deletion: "<<std::endl;
+    in_order(case3);
+    deletion(case3, 2);
+    std::cout<<"Tree after deletion: "<<std::endl;
+    in_order(case3);
     return 0;
 }
