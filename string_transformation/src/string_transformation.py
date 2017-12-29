@@ -28,7 +28,7 @@ def delete_insert(a_lst, to_be_deleted_index, match_target):
 
 def match_comparison(a_lst, b_lst):
     """It tries converting a into b via replacement and insertion, deletion operations"""
-    """Note: We are assuming they both have the same length and they contain the same characters"""
+    """Note: We are assuming they both have the same length"""
     """The main premise here is that replacement is always cheaper than our delete-insert alternative when both lengths are same.
     The reasoning behind it is the following, having a and b as sets of characters with the difference of their sets resulting in an empty set.
     Replacing a character (swapping a character by another in the same string) will always be cheaper than deleting (3) and inserting (4) which would give us a cost of seven, 
