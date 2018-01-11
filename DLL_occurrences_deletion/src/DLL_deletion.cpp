@@ -12,7 +12,7 @@ public:
     Node* next;
     Node* prev;
     Node(int val) {
-        std::cout << "Node constructr!" << std::endl;
+        std::cout << "Node constructor!" << std::endl;
         this->value = val;
         this->next = (Node*)0;
         this->prev = (Node*)0;
