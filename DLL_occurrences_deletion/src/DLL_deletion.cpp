@@ -91,12 +91,12 @@ public:
         while(i != 0){
             cur = i;
             value = cur->value;
-            if(occurrences.find(value) != occurrences.end()){ //If element is already in the list
-                occurrences[value] += 1;
+            if(occurrences.find(value) != occurrences.end()){ //If element is already in the dictionary
+                occurrences[value] += 1; //We increase its amount of occurrences by one
             } else{
-                occurrences[value] = 1;
+                occurrences[value] = 1; //Else we just set it to one
             }
-            i = i->next;
+            i = i->next; //We keep on iterating through the list
         }
         for(std::map<int, int>::iterator it = occurrences.begin(); it != occurrences.end(); it++){
             if(it->second > 1){

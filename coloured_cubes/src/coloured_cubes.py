@@ -29,7 +29,7 @@ def arrange_cubes_by_colour(cubes):
 def alternative_cubes_maximum_lengths(cur_colour,  cubes_by_colour, colours):
     """It will take into a account the current colour, to make sure that only the other cube colours are gonna be taken into account in the next iteration"""
     for cube_by_colour in colours:
-        if(cube_by_colour == cur_colour):
+        if(cube_by_colour == cur_colour): #We ignore the current colour since no adjacent cubes of the same colour can be added
             pass
         else:
             yield max(cubes_by_colour[cube_by_colour])
@@ -40,7 +40,7 @@ def cubes_maximum_lengths(colours, cubes_by_colour):
     for colour in colours:
         yield max(cubes_by_colour[colour])
 
-def delete_cube(cubes_by_colour, deleted_cube): #It deletes a given cube from our group of cubes
+def delete_cube(cubes_by_colour, deleted_cube): #It deletes a given cube from our group of cubes as it has already been added to the pile
     for cubes_by_colour_list in cubes_by_colour.values():
         if(deleted_cube in cubes_by_colour_list):
             cubes_by_colour_list.remove(deleted_cube)
