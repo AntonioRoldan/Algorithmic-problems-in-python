@@ -10,9 +10,9 @@ void swap(int i, int j) {
 int partition(int array[], int left, int right, int pivot){
     int i = left, j = right;
     while (i <= j) { //We are iterating back and forth simultaneously throughout the array 
-        while (array[i] < pivot) //For as long as our forward traversal is less than the pivot 
+        while (array[i] < pivot) //For as long as our forward iteration is less than the pivot
             i++;
-        while (array[j] > pivot) //For as long as our backwards traversal is greater than the pivot 
+        while (array[j] > pivot) //For as long as our backwards iteration is greater than the pivot
             j--;
         if (i <= j) { //Variables are swapped to satisfy the fundamental condition of the quicksort algorithm 
             swap(array[i], array[j]);

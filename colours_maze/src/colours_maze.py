@@ -328,14 +328,6 @@ def get_connected_sets(nxm):
         continue
     return colour_to_sets
 
-def get_colour_squares_helper(nxm, colour):
-    colour_squares = []
-    for i in range(len(nxm)):
-        for j in range(len(nxm[0])):
-            if nxm[i][j] == colour:
-                colour_squares.append([i, j])
-    return colour_squares
-
 def collect_adjacent_squares_helper(nxm, squares_of_colour, connected_sets):
     square_to_adjacent = {}
     for square in squares_of_colour:
@@ -347,11 +339,19 @@ def collect_adjacent_squares_helper(nxm, squares_of_colour, connected_sets):
 
 def collect_adjacent_squares(nxm, connected_sets):
     squares_with_colour = get_colour_squares(nxm)
-    colour_to_squares_to_adjacent = {}
+    colour_to_squares_to_adjacent = {} #A dictionary of dictionaries with each dictionary being a square and its  adjacent values
     for colour in squares_with_colour.keys():
         temporary_container = squares_with_colour[colour]
         colour_to_squares_to_adjacent[colour] = collect_adjacent_squares_helper(nxm, temporary_container, connected_sets)
     return colour_to_squares_to_adjacent
+
+def get_colour_squares_helper(nxm, colour):
+    colour_squares = []
+    for i in range(len(nxm)):
+        for j in range(len(nxm[0])):
+            if nxm[i][j] == colour:
+                colour_squares.append([i, j])
+    return colour_squares
 
 def get_colour_squares(nxm):
     squares_with_colour = {}
@@ -359,6 +359,19 @@ def get_colour_squares(nxm):
     for colour in colours:
         squares_with_colour[colour] = get_colour_squares_helper(nxm, colour)
     return squares_with_colour
+
+def find_largest_connected_set_example(nxm):
+    largest_sets = {}
+    largest_set_colours = []
+    connected_sets = get_connected_sets(nxm)
+    for colour in connected_sets.keys():
+        largest_sets[colour] = max(connected_sets[colour], key=len) #We get the maximum length sets of a given colour
+    maximum_length = len(max(largest_sets.values(), key=len)) #We get the length of the largest set
+    for colour in largest_sets.keys():
+        if len(largest_sets[colour]) == maximum_length: #We add to our solutions all sets having that same length
+            largest_set_colours.append(colour)
+    for colour in largest_set_colours: #We print those sets, in case there are multiple solutions
+        print(colour)
 
 def find_largest_connected_set(w, h):
     nxm = generate_matrix(w, h)
@@ -383,4 +396,4 @@ nxm = [[1, 3, 5, 6, 6, 6], [8, 8, 5, 2, 2, 2], [2, 8, 8, 3, 4, 1], [7, 1, 8, 5, 
 colours_in_matrix(nxm)
 connected_sets = []
 
-find_largest_connected_set(nxm)
+find_largest_connected_set_example(nxm)

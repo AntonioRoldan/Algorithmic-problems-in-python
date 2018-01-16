@@ -73,24 +73,24 @@ void deletion(BinTreeNode* tree, int key){
     if(tree->right == NULL and tree->left == NULL){
         tree = NULL;
     }
-    if(children_count == 0){
-        if (parent->right == node){
+    if(children_count == 0) {
+        if (parent->right == node) {
             parent->right = NULL;
-        } else{
+        } else {
             parent->left = NULL;
         }
         parent->left = NULL;
-    } else if(children_count == 1){
+    } else if(children_count == 1) {
         if (node->left == NULL){
             node = node->right;
             parent->right = node;
             node->right = NULL;
-        } else{
+        } else {
             node = node->left;
             parent->left = node;
             node->left = NULL;
         }
-    } else{
+    } else {
         minimum = find_minimum(node); //We find minimum value in right subtree
         node->value = minimum->value;
         deletion(minimum, minimum->value);

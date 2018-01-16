@@ -10,10 +10,9 @@ class Node:
         self.adjacent_nodes_amount = random.randint(0, self.adjacent_nodes_maximum_amount) #Plus the amount of nodes we are going to pick up capped at our previous variable, so we don't pick more than there are
         self.adjacency_list = list(range(0, probability))
         self.adjacency_list = [n + 1 for n in self.adjacency_list]
-        for vertex in self.adjacency_list:
-            if(vertex == self.value):
-                self.adjacency_list.remove(vertex)
-                break
+        self.adjacency_list = [vertex for vertex in self.adjacency_list if vertex != self.value]
+        self.adjacency_list = [(vertex, random.randint(0, 100)) for vertex in self.adjacency_list]
+
     def get_adjacency_list(self):
         return self.adjacency_list
 
@@ -25,6 +24,7 @@ class Graph:
     def make_undirected(self):
         nodes_dictionary = {}
         for node in self.nodes:
+            node.adjacency_list = [vertex[0] for vertex in node.adjacency_list]
             nodes_dictionary[node.value] = node.adjacency_list
         for node in self.nodes:
             value = node.value
@@ -40,8 +40,7 @@ def create_graph(n_nodes):
 
 def main():
     n_nodes = int(input("Type a number of vertices" ))
-    graph = create_graph(n_nodes) #It creates a directed graph by default 
-    graph.make_undirected()
+    graph = create_graph(n_nodes) #It creates a directed graph by default
     for node in graph.nodes:
         print("Node: ")
         print(str(node.value))
@@ -51,5 +50,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

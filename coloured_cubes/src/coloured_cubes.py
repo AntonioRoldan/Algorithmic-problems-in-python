@@ -32,7 +32,7 @@ def alternative_cubes_maximum_lengths(cur_colour,  cubes_by_colour, colours):
         if(cube_by_colour == cur_colour): #We ignore the current colour since no adjacent cubes of the same colour can be added
             pass
         else:
-            yield max(cubes_by_colour[cube_by_colour])
+            yield max(cubes_by_colour[cube_by_colour]) #We get the cube of maximum length out of those of a given colour
         continue
 
 def cubes_maximum_lengths(colours, cubes_by_colour):
@@ -59,14 +59,13 @@ def display_solution(cubes, pile_of_blocks):
         cube_height = block[1]
         print(cube_name + ' of colour ' + cubes[cube_name][0] + ' and length ' + str(cube_height))
 
-
 def recursive_build_pile(first_block, cubes, cubes_by_colour, colours, pile_of_blocks):
     colours = set(colours) if(first_block) else update_colours(cubes_by_colour)
     maximum_length_cubes = list(cubes_maximum_lengths(colours, cubes_by_colour))
     cur_colour = ""
     if(len(colours) == 1 and first_block):
         return sorted(cubes_by_colour[colours.pop()], key=operator.itemgetter(1))[-1]
-    elif(len(colours) == 1):
+    elif(len(colours) == 1): #Recursion continues until we have only one colour left
         cur_colour = colours.pop()
         max_block = max(cubes_by_colour[cur_colour])
         pile_of_blocks.append(max_block)
@@ -108,7 +107,6 @@ def iterative_build_pile(cubes, cubes_by_colour, colours):
     # Since we have already chose the maximum element from the previously available colours and the their next cubes will always have a larger length
     # by the time we get to the only colour we have left, its value will always be lower than its predecessors and so we can discard it
 
-
 def colour_cubes(n, cubes):
     pile_of_blocks = []
     cubes_by_colour, colours = arrange_cubes_by_colour(cubes) #We get a dictionary with colours as keys and cubes' names and lengths as values
@@ -121,4 +119,3 @@ def colour_cubes(n, cubes):
     #print(cubes_by_colour)
 
 colour_cubes(3, {'cube 1' : ('red', 5) , 'cube 2' : ('red', 6), 'cube 3' : ('blue', 5), 'cube 4' : ('blue', 7), 'cube 5' : ('yellow', 3), 'cube 6' : ('green', 6)})
-
